@@ -1,0 +1,124 @@
+TeamName <- read.csv("D:/Google Drive/Math/Regression Methods/Project/NBA/TeamName.csv")
+Team17_18 <- read.csv("D:/Google Drive/Math/Regression Methods/Project/NBA/2017-18Team.csv")
+Team17_18$Team<-TeamName$Abbre
+names(Team17_18)[5]<-"WinScore"
+Team17_18$WinScore <- Team17_18$WinScore*100
+
+plot(Team17_18$RPM, Team17_18$WinScore,
+     xlab = "Real Plus Minus",
+     ylab = "WinScore", cex.lab=1.5,
+     pch =16,cex=2)
+
+plot(Team17_18$X3PM, Team17_18$WinScore,
+     xlab = "Real Plus Minus",
+     ylab = "WinScore", cex.lab=1.5,
+     pch =16,cex=2)
+
+regX3P=lm(Team17_18$WinScore~Team17_18$X3P.)
+summary(regX3P)
+cor(Team17_18$WinScore,Team17_18$X3PM)
+
+
+Tsalary <- read.csv("C:/Users/rayzh/Desktop/temp.csv") #import salary data
+ind = match(Tsalary$City,TeamName$City)    # find the index which matches city name
+View(ind)   # OKC is NA
+ind[3]=10   # Assign index# to OKC manually
+Tsalary$City<-TeamName$Abbre[ind]   # give abbre. name
+
+### Now I need to merge the salary to Team17_18
+ind <-match(Team17_18$Team,Tsalary$City)  #find the index
+Team17_18$salaryCap <- Tsalary$SalaryCap[ind]
+Team17_18$salary <- Tsalary$Salary[ind]
+plot(Team17_18$salaryCap, Team17_18$WinScore,
+     xlab = "Team Salary",
+     ylab = "WinScore", cex.lab=1.5,
+     pch =16)
+
+## Age info.
+age <- read.csv("C:/Users/rayzh/Desktop/temp.csv")
+ind = match(age$City,TeamName$City)
+age$City<-TeamName$Abbre[ind] 
+ind <-match(Team17_18$Team,age$City)
+Team17_18$Age <- age$Age[ind]
+plot(Team17_18$Age, Team17_18$WinScore,
+     xlab = "Team Salary",
+     ylab = "WinScore", cex.lab=1.5,
+     pch =16)
+cor(Team17_18$Age, Team17_18$WinScore)
+
+
+regmulti <- lm(WinScore ~ FGM + FGA + FG. + X3PM + X3PA + X3P. +FTM + FTA 
+               +FT. +DREB + AST + TOV +STL + BLK +BLKA, data = y)
+
+LAL[[paste0(asdklfasdk)]]  <- read.xlsx(paste0)
+GSW15tot <- read.xlsx("D:/Google Drive/Math/Regression Methods/Project/NBA/GSW.xlsx", 1)
+SAS16tot <- read.xlsx("D:/Google Drive/Math/Regression Methods/Project/NBA/SAS.xlsx", 1)
+SAS17tot <- read.xlsx("D:/Google Drive/Math/Regression Methods/Project/NBA/SAS.xlsx", 2)
+SAS18tot <- read.xlsx("D:/Google Drive/Math/Regression Methods/Project/NBA/SAS.xlsx", 3)
+
+time17 <- data.frame(matrix(ncol = 15, nrow = 30))
+Westrank17 <-c("GSW","SAS","HOU","LAC","UTA","OKC","MEM","POR","DEN","NOP","DAL","SAC","MIN","LAL","PHX")
+colnames(time17) <- Westrank17
+
+for (i in Westrank17){
+  temp <- paste0(i,"17tot")
+  temp2 <- get(temp)$MP
+  time17[,i] <- c(temp2,rep(NA,30-length(temp2)))
+}
+write.xlsx(time17,"D:/Google Drive/Math/Regression Methods/Project/time17.xlsx",showNA=FALSE)
+
+###############################################################
+S17team <- list()
+counter = 0 
+  for (k in Westrank17){
+    counter <- counter + 1
+    tempName <- paste0(k,"17tot")
+    df <- get(tempName)
+    p <- nrow(df)
+    n <- seq(1,p)
+    m <- p+1
+    L <- p+2
+    df[is.na(df)] <- 0
+    total = colSums(df[,2:27])
+    total[c(7,10,13,17)] <- round(total[c(5,8,11,15)]/total[c(6,9,12,16)],3)
+    total <- c(0,total)
+    df <- rbind(df,total)
+    df$Name <- as.character(df$Name)
+    df$Name[m] <- "tot"
+    veTemp <- rep(0,27)
+      for (i in n){
+      if (df$MP[i]>820){
+      veTemp[2:27] <- veTemp[2:27] + df[i,2:27]
+      }}
+    veTemp <-unlist(veTemp)
+    veTemp[c(8,11,14,18)] <- round(veTemp[c(6,9,12,16)]/veTemp[c(7,10,13,17)],3)
+    df <- rbind(df,veTemp)
+    df$Name[L] <- "tot820"
+    
+    S17team[[counter]] <- df
+  }
+
+###      eval(parse(text=tempName))     ##Be careful when use this one, list is a better choice
+###################################
+
+s17tot820 <- S17team[[1]][19,]
+
+n<-nrow(S17team[[2]])
+
+k=seq(2,15)
+for (i in k){
+  n <- nrow(S17team[[i]])
+  s17tot820 <- rbind(s17tot820,S17team[[i]][n,])
+}
+
+n <- nrow(S17team[[1]])
+n
+s17tot820 <- rbind(s17tot820,S17team[[15]][20,])
+S17team[[5]][17,]
+View(Westrank17)
+
+row.names(s17tot820)<-Westrank17
+s17tot820<-s17tot820[,-1]
+a<-c(67,61,55,51,51,47,43,41,40,34,33,32,31,26,24)
+s17tot820 <- cbind(a,s17tot820)
+colnames(s17tot820)[1] <- "Wins"
