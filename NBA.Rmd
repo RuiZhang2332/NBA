@@ -1,0 +1,220 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
+```{r, echo=FALSE}
+knitr::opts_chunk$set(error = TRUE)
+```
+---
+title: "NBA Project"
+author: "Andrew Kurzweil, Eric Entrup, Rui Zhang"
+date: "March 27, 2019"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{R}
+library(readxl)
+
+```
+Good at defensing or offensing doesn't gararantee to win more games. For example, during 2015~2016 season, Utah Jazz was the 2nd best denfenive team, it even couldn't appear in playoff, because Jazz was one of the worst offensive team in the league. Therefore, we use the differental of average points and opponent average point to evaluatre how many games the team can win. Form the four plots below, we can see there is a strong linear relationship between point diffential and wins. 
+
+```{R}
+n<-seq(1,4)
+xtick <- seq(-10,10,by=2)
+par(mfrow=c(2,2))
+for (i in n){
+  m = i+2014
+  plot(list1[[i]][["DIFF"]],list1[[i]][["WIN"]],
+       xaxt="n",
+       main = "(DIFF = Ave. point - Opponent ave points)",
+       xlab = labels[i],ylab="Wins",
+       xlim=c(-11,11),ylim = c(10,75))
+       axis(side=1,at=xtick)
+}
+```
+# **1. How to evaluate offense?**
+To evaluate offense, we will choose the following variables:
+2 point field goal attempted, 2 point field goal made, 2 point field goal%
+3 point field goal attempted, 3 point field goal made, 3 point field goal%
+free throw attempted, free throw made, free throw %
+Team Assists per game 
+
+```{R}
+chart.Correlation(data, histogram=TRUE, pch=19)
+```
+
+# **2. How to evaluate defense?**
+```{R}
+# Read in def stat from 14 ~ 18 season of all NBA teams
+n <-seq(1,5)
+temp1 <-c(rep(0,5))
+m <- n+13
+defense <-list()
+for(i in n){
+  temp1[i] <- paste0("s",m[i])
+  defense[[i]] <- read_excel("D:/Google Drive/Math/Regression Methods/Project/NBA/defense.xlsx",i)
+}
+names(defense) <- temp1
+```
+## 1. Now I want to look at the relationship between defense and wins
+```{R}
+par(mfrow=c(2,3))
+for(i in n){
+  m=i+2012
+  L=i+2013
+  plot(defense[[i]][["STANDING"]],defense[[i]][["DEF RANKING"]],
+     main = paste("Season",m,"~",L),
+     xlab = "Team Ranking",
+     ylab = "Team Defense Ranking")
+}
+```
+ Looks like there is a linear relationship between Team rankings and Team defense rankings. There are so many   variables to evaluate how good of a team's defense. I need to decide which variables I want to use.
+
+###  a) Opponent points in paint area
+```{R}
+ knitr::include_graphics("D:/Google Drive/Math/Regression Methods/Project/NBA/PIC/paint area.jpg")
+```
+The organe area is call "paint area". Usually, player has highest field goal rate in the area since it very close to the basket.
+```{R}
+par(mfrow=c(2,3))
+for(i in n){
+  m=i+2012
+  L=i+2013
+  plot(defense[[i]][["DEF RANKING"]],defense[[i]][[14]],
+     main = paste("Season",m,"~",L),
+     xlab = "Team Defense Ranking",
+     ylab = "Opponent Points in Paint Area")
+}
+```
+
+
+### b) *__Opponent Fast break points__*
+```{R}
+par(mfrow=c(2,3))
+for(i in n){
+  m=i+2012
+  L=i+2013
+  plot(defense[[i]][[13]],defense[[i]][["DEF RANKING"]],
+     main = paste("Season",m,"~",L),
+     xlab = "OPP PTS FB",
+     ylab = "DEF RANKING")
+}
+```
+I can see the linear relationship for each seeason. If you can limit opponent's points in fast break, seems you can win more games. This make sense, because a good team can always turn defensive rebound, a steal, or a block to a fast break to get points.
+
+### c) Steal
+```{R}
+par(mfrow=c(2,3))
+for(i in n){
+  m=i+2012
+  L=i+2013
+  plot(defense[[i]][["STL"]],defense[[i]][["DEF RANKING"]],
+     main = paste("Season",m,"~",L),
+     xlab = "Steal",
+     ylab = "DEF RANKING")
+}
+```
+
+### d) Block
+```{R}
+par(mfrow=c(2,3))
+for(i in n){
+  m=i+2012
+  L=i+2013
+  plot(defense[[i]][["W"]],defense[[i]][["BLK"]],
+     main = paste("Season",m,"~",L),
+     xlab = "Wins",
+     ylab = "Blocks")
+}
+```
+
+### e)  DREB%
+DREB% = Team defensive rebound/(Team defensive rebound + opponent offensive rebound)
+I use percent defensive rebound because this variable is much more better than team defensive rebound. Some teams may have higher team defensive rebound, in fact, they don't control the defensive rebound.They get more deffensive rebound it just because the pace of the game is faster. Meanwhile, their opponents get more offensive rebound. 
+
+```{R}
+par(mfrow=c(2,3))
+for(i in n){
+  m=i+2012
+  L=i+2013
+  plot(defense[[i]][["W"]],defense[[i]][["DREB%"]],
+     main = paste("Season",m,"~",L),
+     xlab = "Wins",
+     ylab = "DREB%")
+}
+``` 
+
+
+# 3. Variable Selection (Stepwise)
+I am going to use the data from season 2017~2018
+
+```{R}
+null <- lm(WIN~1,data=var18)
+full <- lm(WIN~
+stepwis <-step(null,scope=formula(full),direction="both")
+```
+
+The lowest AIC = 115.11. And the model is "WIN ~ X2P. + OPP.PTS.FB + X3P. + AST + BLK"
+```{R}
+reg <- lm(WIN ~ X2P. + OPP.PTS.FB + X3P. + AST + BLK, data =var18)
+summary(reg)
+```
+Now, I am going to compare the model with real data.
+
+```{R}
+plot(n,var18$WIN,
+     xlab = "Team ranking",
+     ylab = "Wins")
+lines(n,win18,col ="red")
+```
+The red line is from our model. We can see, the predict results of team NO.4,9,13,15 have big difference with the real data. I think that because this model doesn't evaluate defense very well.  
+For example, the NO.4,NO.9, NO.13 team are Boston Celtics, Utah Jazz, and San Antonio Spurs, respectively. Their defensive rating are NO.2, NO.1, and NO.4, respectively. This means I need find other meaningful variable to evaluate defense.
+
+full model
+```{R}
+null <- lm(WIN ~1,data=data)
+full <-lm(WIN ~.,data=data)
+summary(null)
+summary(full)
+```
+Stepwise
+```{R}
+stepwise <-step(null,scope=formula(full),direction="both")
+```
+```{R}
+reg<-lm(WIN ~ X2P. + OPP.PTS.FB + X3P. + ORB + AST + BLK + TOV + DREB. + STL, data=data)
+summary(reg)
+```
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
