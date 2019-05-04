@@ -1,0 +1,30 @@
+---
+title: "Untitled"
+author: "RZ"
+date: "March 29, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Good at defensing or offensing doesn't gararantee to win more games. For example, during 2015~2016 season, Utah Jazz was the 2nd best denfenive team, it even couldn't appear in playoff, because Jazz was one of the worst offensive team in the league. Therefore, we use the differental of average points and opponent average point to evaluatre how many games the team can win. Form the four plots below, we can see there is a strong linear relationship between point diffential and wins. 
+
+```{R}
+labels <-c("2015 DIFF","2016 DIFF","2017 DIFF","2018 DIFF")
+n<-seq(15,18)
+xtick <- seq(-10,10,by=2)
+#par(mfrow=c(2,2))
+
+for (i in n){
+  temp <- paste0("s",i,"sum")
+  m = i-14
+  plot(list1[[paste0("s",i,"sum")]][["DIFF"]],list1[[paste0("s",i,"sum")]][["WIN"]],
+       xaxt="n",
+       main = "(DIFF = Ave. point - Opponent ave points)",
+       xlab = labels[m],ylab="Wins",
+       xlim=c(-11,11),ylim = c(10,75))
+       axis(side=1,at=xtick)
+}
+```

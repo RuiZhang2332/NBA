@@ -16,13 +16,13 @@ output:
   word_document: default
 ---
 
-```{R}
+```{r,echo=FALSE}
 library(readxl)
 
 ```
 Good at defensing or offensing doesn't gararantee to win more games. For example, during 2015~2016 season, Utah Jazz was the 2nd best denfenive team, it even couldn't appear in playoff, because Jazz was one of the worst offensive team in the league. Therefore, we use the differental of average points and opponent average point to evaluatre how many games the team can win. Form the four plots below, we can see there is a strong linear relationship between point diffential and wins. 
 
-```{R}
+```{r, echo=FALSE}
 n<-seq(1,4)
 xtick <- seq(-10,10,by=2)
 par(mfrow=c(2,2))
